@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#313335"
+    android:orientation="vertical"
+    android:padding="0dp"
+    tools:context=".MainActivity">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="start"
+                    android:layout_weight="1"
+                    android:background="#595B5D"
+                    android:longClickable="false"
+                    android:measureWithLargestChild="false"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/imageView3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="TODO"
+                        app:srcCompat="@drawable/border_flags_l" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#595B5D"
+                    android:foregroundGravity="center_vertical|center_horizontal"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/spacer_01"
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:background="#595B5D" />
+
+                    <ImageView
+                        android:id="@+id/logo"
+                        android:layout_width="match_parent"
+                        android:layout_height="92dp"
+                        app:srcCompat="@drawable/header" />
+
+                    <ImageView
+                        android:id="@+id/spacer_02"
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:background="#595B5D" />
+
+                    <EditText
+                        android:id="@+id/edit_entry_quote"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:hint="Quote"
+                        android:inputType="text"
+                        android:textColor="#f4f4f4"
+                        android:textColorHint="#D6D7D7" />
+
+                    <EditText
+                        android:id="@+id/edit_entry_author"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:hint="Author"
+                        android:inputType="text"
+                        android:textColor="#f4f4f4"
+                        android:textColorHint="#D6D7D7" />
+
+                    <EditText
+                        android:id="@+id/edit_entry_category"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:hint="#1 positive |  #2 negative"
+                        android:inputType="number"
+                        android:textColor="#f4f4f4"
+                        android:textColorHint="#D6D7D7" />
+
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:onClick="addQuote"
+                        android:text="Add"
+                        android:textColor="@color/colorPrimary" />
+
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:onClick="loadQuotations"
+                        android:text="Sort" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <android.support.v4.widget.NestedScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="18dp"
+                            android:layout_marginRight="18dp"
+                            android:background="#f4f4f4">
+
+                            <TextView
+                                android:id="@+id/text_view_data"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="5dp"
+                                android:layout_marginRight="5dp"
+                                android:textSize="20sp" />
+
+                        </android.support.v4.widget.NestedScrollView>
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:layout_weight="1"
+                    android:background="#595B5D"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/imageView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="TODO"
+                        app:srcCompat="@drawable/border_flags_r" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_page_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foregroundGravity="center_horizontal"
+            android:src="@drawable/arrow_up"
+            app:layout_constrainedWidth="false"
+            app:layout_constraintBottom_toBottomOf="@+id/footer"
+            app:layout_constraintEnd_toEndOf="@+id/footer"
+            app:layout_constraintStart_toStartOf="@+id/footer" />
+
+        <ImageView
+            android:id="@+id/footer"
+            android:layout_width="0dp"
+            android:layout_height="55dp"
+            android:layout_marginLeft="41dp"
+            android:layout_marginRight="40dp"
+            android:background="@drawable/list_bottom"
+            android:contentDescription="TODO"
+            android:foregroundGravity="center_horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+
+
+    <!-- <Button
+         android:layout_width="match_parent"
+         android:layout_height= "wrap_content"
+         android:text="Send"
+         android:onClick="saveQuote"/>
+
+     <Button
+         android:layout_width="match_parent"
+         android:layout_height= "wrap_content"
+         android:text="Load"
+         android:onClick="loadQuotation"/>
+
+      <Button
+         android:layout_width="match_parent"
+         android:layout_height= "wrap_content"
+         android:text="Update Quote"
+         android:onClick="updateQuote"/>
+
+     <Button
+         android:layout_width="match_parent"
+         android:layout_height= "wrap_content"
+         android:text="Delete Author"
+         android:onClick="deleteAuthor"/>
+
+     <Button
+         android:layout_width="match_parent"
+         android:layout_height= "wrap_content"
+         android:text="Delete Entry"
+         android:onClick="deleteEntry"/> -->
+
+
+</android.support.constraint.ConstraintLayout>
