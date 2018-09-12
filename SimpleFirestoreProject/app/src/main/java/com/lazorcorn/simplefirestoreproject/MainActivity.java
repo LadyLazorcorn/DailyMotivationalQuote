@@ -1,17 +1,18 @@
 package com.lazorcorn.simplefirestoreproject;
 
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ScrollView;
-import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,7 +30,6 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.SetOptions;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +37,9 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";   //usage for log messages
+
+    private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle menuToggle;
 
     private static final String KEY_QUOTE = "quote";    //access-key to database
     private static final String KEY_AUTHOR = "author";
@@ -58,6 +61,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
+        menuToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close);
+        drawerLayout.addDrawerListener(menuToggle);
+        menuToggle.syncState();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         editTextQuote = findViewById(R.id.edit_entry_quote);
         editTextAuthor = findViewById(R.id.edit_entry_author);
@@ -300,6 +310,26 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         Toast.makeText(MainActivity.this, "Sorted by category", Toast.LENGTH_SHORT).show();
+    }
+
+    public boolean onCreateOptionsmenu(Menu menu){
+        //inflate menu
+        getMenuInflater().inflate(R.menu.options_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        int id = item.getItemId();
+
+        //menu item click handling:
+        if(menuToggle.onOptionsItemSelected(item)){
+            Toast.makeText(this, "Menu open", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
 
