@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         notebookRef.addSnapshotListener(this, new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
-                if(e != null){return;}
+                    if(e != null){return;}
 
                 String dataBuff =  "";
                 String categoryName = "";

@@ -14,7 +14,7 @@
 
     <item android:title="Item4"
         android:id="@+id/item4"
-        app:showAsAction="always"/>
+        app:showAsAction="never"/>
 
 
 
