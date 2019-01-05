@@ -2,4 +2,14 @@
     <string name="app_name">Book Of Quotations</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
+
+    <string-array name="categories">
+        <item>not categorized</item>
+        <item>Power</item>
+        <item>Positive</item>
+        <item>Negative</item>
+        <item>Love</item>
+        <item>Dark Humor</item>
+        <item>Wisdom</item>
+    </string-array>
 </resources>

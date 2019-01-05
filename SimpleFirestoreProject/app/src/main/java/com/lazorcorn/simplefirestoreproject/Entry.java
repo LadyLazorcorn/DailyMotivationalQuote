@@ -7,14 +7,14 @@ public class Entry {
     private String timestamp;
     private String quote = "";
     private String author ="";
-    private int category;
+    private String category = "";
 
 
     public Entry(){
         //public no-arg constructor needed for firestore
     }
 
-    public Entry(String timestamp, String quote, String author, int category){
+    public Entry(String timestamp, String quote, String author, String category){
         this.timestamp = timestamp;
         this.quote = quote;
         this.author = author;
@@ -42,11 +42,7 @@ public class Entry {
         return author;
     }
 
-    public int getCategory() {
+    public String getCategory() {
         return category;
-    }
-
-    public void setCategory(int category) {
-        this.category = category;
     }
 }

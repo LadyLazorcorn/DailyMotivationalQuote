@@ -13,8 +13,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,12 +51,12 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_QUOTE = "quote";    //access-key to database
     private static final String KEY_AUTHOR = "author";
     private static final String KEY_TIMESTAMP = "timestamp";
+    private static final String KEY_CATEGORY = "category";
     private int choice = 0;
 
     private EditText editTextQuote;
     private EditText editTextAuthor;
-    private EditText editTextCategory;
-    private int filter = 0;
+    private Spinner chooseCagegory;
 
     private TextView textViewData;
     private ScrollView scrollView;
@@ -77,7 +79,16 @@ public class MainActivity extends AppCompatActivity {
 
         editTextQuote = findViewById(R.id.edit_entry_quote);
         editTextAuthor = findViewById(R.id.edit_entry_author);
-        editTextCategory = findViewById(R.id.edit_entry_category);
+        chooseCagegory = findViewById(R.id.spinner_category);
+        ArrayAdapter<CharSequence> staticAdapter = ArrayAdapter
+                .createFromResource(this, R.array.categories,
+                android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        staticAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // Apply the adapter to the spinner
+        chooseCagegory.setAdapter(staticAdapter);
+
         textViewData = findViewById(R.id.text_view_data);
         fab = findViewById(R.id.fab_page_up);
         scrollView = findViewById(R.id.scroll_view);
@@ -100,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 String dataBuff = "";
-                String categoryName = "";
 
                 for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                     Entry entry = documentSnapshot.toObject(Entry.class);
@@ -109,15 +119,8 @@ public class MainActivity extends AppCompatActivity {
                     String id = entry.getId();
                     String quote = entry.getQuote();
                     String author = entry.getAuthor();
-                    int category = entry.getCategory();
-                    if (category == 1) {
-                        categoryName = "Bright Side";
-                    } else if (category == 2) {
-                        categoryName = "Dark Side";
-                    } else {
-                        categoryName = "no Side";
-                    }
-                    dataBuff += "\n" + "''" + quote + "''\n\nAuthor: " + author + "\nCategory: " + categoryName + "\n\n▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰\n\n"; //"\nUploaded by: " + id +
+                    String category = entry.getCategory();
+                    dataBuff += "\n" + "''" + quote + "''\n\nAuthor: " + author + "\nCategory: " + category + "\n\n▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰\n\n"; //"\nUploaded by: " + id +
                 }
                 textViewData.setText(dataBuff);
             }
@@ -165,13 +168,7 @@ public class MainActivity extends AppCompatActivity {
             author = "unknown";
         }
         author = clearString(author);
-
-        if (editTextCategory.length() == 0) {
-            editTextCategory.setText("0"); //un-categorized
-        }
-
-        //TODO: add dropdown here
-        int category = Integer.parseInt(editTextCategory.getText().toString());
+        String category = chooseCagegory.getSelectedItem().toString();
 
         //put data in a container to save values related with keys to the database
         Entry entry = new Entry(timestamp, quote, author, category);
@@ -191,7 +188,6 @@ public class MainActivity extends AppCompatActivity {
 
         editTextQuote.setText("");
         editTextAuthor.setText("");
-        editTextCategory.setText("");
     }
 
     private String clearString(String enteredString) {
@@ -204,15 +200,13 @@ public class MainActivity extends AppCompatActivity {
         return cleanString;
     }
 
+    /*
     public void saveQuote(View view) {
         SimpleDateFormat getTime = new SimpleDateFormat("yyyyMMdd_HHmmss");
         String timestamp = getTime.format(new Date());
         String quote = editTextQuote.getText().toString();
         String author = editTextAuthor.getText().toString();
-        if (editTextCategory.length() == 0) {
-            editTextCategory.setText("0"); //un-categorized
-        }
-        int category = Integer.parseInt(editTextCategory.getText().toString());
+        String category = chooseCagegory.getSelectedItem().toString();
 
         //put data in a container to save values related with keys to the database
         Entry entry = new Entry(timestamp, quote, author, category);
@@ -264,12 +258,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot.exists()) {
-                    //String quote = documentSnapshot.getString(KEY_QUOTE);
-                    //String author = documentSnapshot.getString(KEY_AUTHOR); //obsolete through below line
                     Entry entry = documentSnapshot.toObject(Entry.class); //auto recreate entry object and fill fields as long as all names fit
                     String quote = entry.getQuote();
                     String author = entry.getAuthor();
                     String timestamp = entry.getTimestamp();
+                    String category = entry.getCategory();
 
                     textViewData.setText("Quote: " + quote + "\n" + "Author: " + author);
                 } else {
@@ -285,6 +278,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    */
 
     public void loadQuotations(View view) {
         final String[] sorting = {"timestamp descending", "timestamp ascending", "category descending", "category ascending", "author descending", "author ascending"};
@@ -371,7 +366,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(List<QuerySnapshot> querySnapshots) {
                 String dataBuff = "";
-                String categoryName = "";
 
                 for (QuerySnapshot queryDocumentSnapshots : querySnapshots) {
                     for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
@@ -382,15 +376,8 @@ public class MainActivity extends AppCompatActivity {
                         String quote = entry.getQuote();
                         String author = entry.getAuthor();
                         String timestamp = entry.getTimestamp();
-                        int category = entry.getCategory();
-                        if (category == 1) {
-                            categoryName = "Bright Side";
-                        } else if (category == 2) {
-                            categoryName = "Dark Side";
-                        } else {
-                            categoryName = "no Side";
-                        }
-                        dataBuff += "\n" + "''" + quote + "''\n\nAuthor: " + author + "\nCategory: " + categoryName + "\n\n▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰\n\n"; //"\nUploaded by: " + id +
+                        String category = entry.getCategory();
+                        dataBuff += "\n" + "''" + quote + "''\n\nAuthor: " + author + "\nCategory: " + category + "\n\n▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰\n\n"; //"\nUploaded by: " + id +
                     }
                 }
                 textViewData.setText(dataBuff);
