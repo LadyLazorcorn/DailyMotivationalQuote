@@ -4,6 +4,7 @@ import com.google.firebase.firestore.Exclude;
 
 public class Entry {
     private String id;
+    private String timestamp;
     private String quote = "";
     private String author ="";
     private int category;
@@ -13,7 +14,8 @@ public class Entry {
         //public no-arg constructor needed for firestore
     }
 
-    public Entry(String quote, String author, int category){
+    public Entry(String timestamp, String quote, String author, int category){
+        this.timestamp = timestamp;
         this.quote = quote;
         this.author = author;
         this.category = category;
@@ -28,6 +30,9 @@ public class Entry {
         this.id = id;
     }
 
+    public String getTimestamp(){
+        return timestamp;
+    }
 
     public String getQuote(){
         return quote;

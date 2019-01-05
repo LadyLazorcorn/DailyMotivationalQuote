@@ -1,9 +1,11 @@
 package com.lazorcorn.simplefirestoreproject;
 
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,6 +33,9 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.sql.Time;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String KEY_QUOTE = "quote";    //access-key to database
     private static final String KEY_AUTHOR = "author";
+    private static final String KEY_TIMESTAMP = "timestamp";
+    private int choice = 0;
 
     private EditText editTextQuote;
     private EditText editTextAuthor;
@@ -54,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton fab;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference notebookRef =  db.collection("Notebook");
+    private CollectionReference notebookRef = db.collection("Notebook");
     private DocumentReference entriesRef = db.collection("Notebook").document("The First Quotes"); //=database.reference to the collection.create reference to a document
 
     @Override
@@ -68,15 +75,14 @@ public class MainActivity extends AppCompatActivity {
         menuToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
         editTextQuote = findViewById(R.id.edit_entry_quote);
         editTextAuthor = findViewById(R.id.edit_entry_author);
         editTextCategory = findViewById(R.id.edit_entry_category);
         textViewData = findViewById(R.id.text_view_data);
         fab = findViewById(R.id.fab_page_up);
         scrollView = findViewById(R.id.scroll_view);
-        fab.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View view){
+        fab.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
                 scrollView.fullScroll(ScrollView.FOCUS_UP);
             }
         });
@@ -89,12 +95,14 @@ public class MainActivity extends AppCompatActivity {
         notebookRef.addSnapshotListener(this, new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
-                    if(e != null){return;}
+                if (e != null) {
+                    return;
+                }
 
-                String dataBuff =  "";
+                String dataBuff = "";
                 String categoryName = "";
 
-                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots){
+                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                     Entry entry = documentSnapshot.toObject(Entry.class);
                     entry.setId(documentSnapshot.getId());
 
@@ -102,14 +110,14 @@ public class MainActivity extends AppCompatActivity {
                     String quote = entry.getQuote();
                     String author = entry.getAuthor();
                     int category = entry.getCategory();
-                    if(category == 1)
-                    {categoryName = "Bright Side";}
-                    else if(category == 2)
-                    {categoryName = "Dark Side";}
-                    else
-                    {categoryName = "no Side";}
-
-                    dataBuff += "''" + quote + "''\n\nAuthor: " + author +   "\nCategory: " + categoryName + "\n ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰\n\n"; //"\nUploaded by: " + id +
+                    if (category == 1) {
+                        categoryName = "Bright Side";
+                    } else if (category == 2) {
+                        categoryName = "Dark Side";
+                    } else {
+                        categoryName = "no Side";
+                    }
+                    dataBuff += "\n" + "''" + quote + "''\n\nAuthor: " + author + "\nCategory: " + categoryName + "\n\n▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰\n\n"; //"\nUploaded by: " + id +
                 }
                 textViewData.setText(dataBuff);
             }
@@ -142,28 +150,42 @@ public class MainActivity extends AppCompatActivity {
         });*/
     }
 
-    public void addQuote(View view){
+    public void addQuote(View view) {
+        SimpleDateFormat getTime = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String timestamp = getTime.format(new Date());
         String quote = editTextQuote.getText().toString();
+        quote = clearString(quote);
+        if (quote.isEmpty()) {
+            Toast.makeText(MainActivity.this, "No Quote to add!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String author = editTextAuthor.getText().toString();
-        if(editTextCategory.length() == 0){
+        if (author.isEmpty()) {
+            author = "unknown";
+        }
+        author = clearString(author);
+
+        if (editTextCategory.length() == 0) {
             editTextCategory.setText("0"); //un-categorized
         }
 
+        //TODO: add dropdown here
         int category = Integer.parseInt(editTextCategory.getText().toString());
 
         //put data in a container to save values related with keys to the database
-        Entry entry = new Entry(quote, author, category);
+        Entry entry = new Entry(timestamp, quote, author, category);
 
         notebookRef.add(entry).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {
-                Toast.makeText(MainActivity.this,"Quote Added!",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Quote Added!", Toast.LENGTH_SHORT).show();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Toast.makeText(MainActivity.this,"Failed to add note!",Toast.LENGTH_SHORT).show();
-                Log.d(TAG,e.toString());
+                Toast.makeText(MainActivity.this, "Failed to add note!", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, e.toString());
             }
         });
 
@@ -172,39 +194,50 @@ public class MainActivity extends AppCompatActivity {
         editTextCategory.setText("");
     }
 
-    public void saveQuote(View view){
-        String quote = editTextQuote.getText().toString();
-        String author = editTextAuthor.getText().toString();
-        if(editTextCategory.length() == 0){
-            editTextCategory.setText("0"); //un-categorized
+    private String clearString(String enteredString) {
+        String cleanString = enteredString.replaceFirst("\"", "");
+        if(cleanString.endsWith("\""))
+        {
+            cleanString = cleanString.substring(0,cleanString.length() - 1);
         }
 
+        return cleanString;
+    }
+
+    public void saveQuote(View view) {
+        SimpleDateFormat getTime = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String timestamp = getTime.format(new Date());
+        String quote = editTextQuote.getText().toString();
+        String author = editTextAuthor.getText().toString();
+        if (editTextCategory.length() == 0) {
+            editTextCategory.setText("0"); //un-categorized
+        }
         int category = Integer.parseInt(editTextCategory.getText().toString());
 
         //put data in a container to save values related with keys to the database
-        Entry entry = new Entry(quote, author, category);
+        Entry entry = new Entry(timestamp, quote, author, category);
 
         entriesRef.set(entry). //pass new entry to firestore & set it as value for the first document
-           //.save entry there
-           //the same like: db.document("Notebook/MyFirstQuote").
-            addOnSuccessListener(new OnSuccessListener<Void>() {
-                   @Override
-                   public void onSuccess(Void aVoid) { //callback method
-                       Toast.makeText(MainActivity.this,"Saved!",Toast.LENGTH_SHORT).show();
-                   }
-            })
-            .addOnFailureListener(new OnFailureListener() {
-                   @Override
-                   public void onFailure(@NonNull Exception e) {
-                       Toast.makeText(MainActivity.this,"Failed to save!",Toast.LENGTH_SHORT).show();
-                       Log.d(TAG,e.toString());
-                   }
-            });
+                //.save entry there
+                //the same like: db.document("Notebook/MyFirstQuote").
+                        addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) { //callback method
+                        Toast.makeText(MainActivity.this, "Saved!", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(MainActivity.this, "Failed to save!", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, e.toString());
+                    }
+                });
         editTextQuote.setText("");
         editTextAuthor.setText("");
     }
 
-    public void updateQuote(View view){
+    public void updateQuote(View view) {
         String quote = editTextQuote.getText().toString();
 
         //Map<String, Object> entry = new HashMap<>();
@@ -215,78 +248,132 @@ public class MainActivity extends AppCompatActivity {
         editTextQuote.setText("");
     }
 
-    public void deleteAuthor(View view){
+    public void deleteAuthor(View view) {
         Map<String, Object> entry = new HashMap<>();
         entriesRef.update(KEY_AUTHOR, FieldValue.delete()); //Field Value deletes the Key-entry for "Author" in db
         editTextAuthor.setText("");
     }
 
-    public void deleteEntry(View view){
+    public void deleteEntry(View view) {
         entriesRef.delete();
     }
 
-    public void loadQuotation(View view){
-            entriesRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+    public void loadQuotation(View view) {
+        entriesRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
 
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    if (documentSnapshot.exists()) {
-                        //String quote = documentSnapshot.getString(KEY_QUOTE);
-                        //String author = documentSnapshot.getString(KEY_AUTHOR); //obsolete through below line
-                        Entry entry = documentSnapshot.toObject(Entry.class); //auto recreate entry object and fill fields as long as all names fit
-                        String quote = entry.getQuote();
-                        String author = entry.getAuthor();
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    //String quote = documentSnapshot.getString(KEY_QUOTE);
+                    //String author = documentSnapshot.getString(KEY_AUTHOR); //obsolete through below line
+                    Entry entry = documentSnapshot.toObject(Entry.class); //auto recreate entry object and fill fields as long as all names fit
+                    String quote = entry.getQuote();
+                    String author = entry.getAuthor();
+                    String timestamp = entry.getTimestamp();
 
-                        textViewData.setText("Quote: " + quote + "\n" + "Author: " + author);
-                    }
-                    else{
-                        Toast.makeText(MainActivity.this, "Document doesn't exists!", Toast.LENGTH_SHORT).show();
-                    }
+                    textViewData.setText("Quote: " + quote + "\n" + "Author: " + author);
+                } else {
+                    Toast.makeText(MainActivity.this, "Document doesn't exists!", Toast.LENGTH_SHORT).show();
                 }
-            })
-            .addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, e.toString());
-                }
-            });
+            }
+        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, e.toString());
+                    }
+                });
     }
 
-    public void filterAuthor(View view){
+    public void loadQuotations(View view) {
+        final String[] sorting = {"timestamp descending", "timestamp ascending", "category descending", "category ascending", "author descending", "author ascending"};
 
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Filter by");
+        builder.setItems(sorting, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == 0) {
+                    choice = 0;
+                    applyFilter();
+                }
+                else if (which == 1) {
+                    choice = 1;
+                    applyFilter();
+                }
+                else if (which == 2) {
+                    choice = 2;
+                    applyFilter();
+                }
+                else if (which == 3) {
+                    choice = 3;
+                    applyFilter();
+                }
+                else if (which == 4) {
+                    choice = 4;
+                    applyFilter();
+                }
+                else if (which == 5) {
+                    choice = 5;
+                    applyFilter();
+                }
+            }
+        });
+        builder.show();
     }
 
-    public void loadQuotations(View view){
-        Task task1 = notebookRef.whereLessThanOrEqualTo("category", 2)
-                .orderBy("category", Query.Direction.DESCENDING)
+    private void applyFilter() {
+        Task task = notebookRef
+                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get();
-        /*Task task2 = notebookRef.whereEqualTo("category", 1)
-                .orderBy("category")
-                .orderBy("author")
-                .get();
-        Task task3 = notebookRef.whereEqualTo("category", 2)
-                .orderBy("category")
-                .orderBy("author")
-                .get();
-        Task task4 = notebookRef.whereEqualTo("category", 0)
-                .orderBy("category")
-                .orderBy("author")
-                .get();
-        Task task5 = notebookRef.whereGreaterThanOrEqualTo("category", 3)
-                .orderBy("category")
-                .orderBy("author")
-                .get();*/
+        String selectedFilter = "";
 
+        if (choice == 0) {
+            task = notebookRef
+                    .orderBy("timestamp", Query.Direction.DESCENDING)
+                    .get();
+            selectedFilter = "timestamp";
+        }
+        else if (choice == 1) {
+            task = notebookRef
+                    .orderBy("timestamp", Query.Direction.ASCENDING)
+                    .get();
+            selectedFilter = "timestamp";
+        }
+        else if (choice == 2) {
+            task = notebookRef.whereLessThanOrEqualTo("category", 2)
+                    .orderBy("category", Query.Direction.DESCENDING)
+                    .get();
+            selectedFilter = "category";
+        }
+        else if (choice == 3) {
+            task = notebookRef.whereLessThanOrEqualTo("category", 2)
+                    .orderBy("category", Query.Direction.ASCENDING)
+                    .get();
+            selectedFilter = "category";
+        }
+        else if (choice == 4) {
+            task = notebookRef
+                    .orderBy("author", Query.Direction.DESCENDING)
+                    .get();
+            selectedFilter = "author";
+        }
+        else if (choice == 5) {
+            task = notebookRef
+                    .orderBy("author", Query.Direction.ASCENDING)
+                    .get();
+            selectedFilter = "author";
+        }
 
-        Task<List<QuerySnapshot>> allTasks = Tasks.whenAllSuccess(task1); //QuerySnapshot is the return Type
+        Task<List<QuerySnapshot>> allTasks = Tasks.whenAllSuccess(task); //QuerySnapshot is the return Type
         allTasks.addOnSuccessListener(new OnSuccessListener<List<QuerySnapshot>>() {
             @Override
             public void onSuccess(List<QuerySnapshot> querySnapshots) {
                 String dataBuff = "";
                 String categoryName = "";
 
-                for(QuerySnapshot queryDocumentSnapshots : querySnapshots) {
+                for (QuerySnapshot queryDocumentSnapshots : querySnapshots) {
                     for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                         Entry entry = documentSnapshot.toObject(Entry.class);
                         entry.setId(documentSnapshot.getId());
@@ -294,6 +381,7 @@ public class MainActivity extends AppCompatActivity {
                         String id = entry.getId();
                         String quote = entry.getQuote();
                         String author = entry.getAuthor();
+                        String timestamp = entry.getTimestamp();
                         int category = entry.getCategory();
                         if (category == 1) {
                             categoryName = "Bright Side";
@@ -302,29 +390,27 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             categoryName = "no Side";
                         }
-
-                        dataBuff += "''" + quote + "''\n\nAuthor: " + author + "\nCategory: " + categoryName + "\n ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰\n\n"; //"\nUploaded by: " + id +
+                        dataBuff += "\n" + "''" + quote + "''\n\nAuthor: " + author + "\nCategory: " + categoryName + "\n\n▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰\n\n"; //"\nUploaded by: " + id +
                     }
                 }
                 textViewData.setText(dataBuff);
             }
         });
-        Toast.makeText(MainActivity.this, "Sorted by category", Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "Sorted by " + selectedFilter, Toast.LENGTH_SHORT).show();
     }
 
-    public boolean onCreateOptionsmenu(Menu menu){
+    public boolean onCreateOptionsmenu(Menu menu) {
         //inflate menu
         getMenuInflater().inflate(R.menu.options_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
+    public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
         //menu item click handling:
-        if(menuToggle.onOptionsItemSelected(item)){
+        if (menuToggle.onOptionsItemSelected(item)) {
             Toast.makeText(this, "Menu open", Toast.LENGTH_SHORT).show();
             return true;
         }
